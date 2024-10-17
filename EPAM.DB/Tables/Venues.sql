@@ -1,0 +1,5 @@
+﻿CREATE TABLE [DbF].[Venues]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL, 
+    [Name] NVARCHAR(100) NOT NULL
+)

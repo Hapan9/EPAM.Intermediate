@@ -1,0 +1,3 @@
+﻿ALTER TABLE [DbF].[Raws]
+	ADD CONSTRAINT [PK_Raws]
+	PRIMARY KEY ([Id])

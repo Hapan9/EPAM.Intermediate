@@ -1,0 +1,4 @@
+﻿ALTER TABLE [DbF].[Seats]
+	ADD CONSTRAINT [DF_Seats_Id]
+	DEFAULT NewID()
+	FOR [Id]

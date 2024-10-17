@@ -1,0 +1,4 @@
+﻿ALTER TABLE [DbF].[Events]
+	ADD CONSTRAINT [DF_Events_Id]
+	DEFAULT NewID()
+	FOR [Id]

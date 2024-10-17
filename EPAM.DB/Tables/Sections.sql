@@ -1,0 +1,8 @@
+﻿CREATE TABLE [DbF].[Sections]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL, 
+    [Name] NVARCHAR(100) NOT NULL, 
+    [VenueId] UNIQUEIDENTIFIER NOT NULL
+)
+
+

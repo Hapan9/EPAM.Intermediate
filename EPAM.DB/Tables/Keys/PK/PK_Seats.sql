@@ -1,0 +1,3 @@
+﻿ALTER TABLE [DbF].[Seats]
+	ADD CONSTRAINT [PK_Seats]
+	PRIMARY KEY ([Id])

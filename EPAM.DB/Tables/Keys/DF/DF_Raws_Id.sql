@@ -1,0 +1,4 @@
+﻿ALTER TABLE [DbF].[Raws]
+	ADD CONSTRAINT [DF_Raws_Id]
+	DEFAULT NewID()
+	FOR [Id]
