@@ -1,18 +1,17 @@
 ﻿using Dapper;
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Abstraction;
-using EPAM.Persistence.Repositories.Interfaces;
 using System.Data;
 
 namespace EPAM.Persistence.Repositories
 {
-    public sealed class EventRepository : BaseRepository, IRepository<Event>
+    public sealed class EventRepository : BaseRepository//, IRepository<Event>
     {
         public EventRepository(IDbConnection dbConnection, IDbTransaction? dbTransaction) : base(dbConnection, dbTransaction)
         {
         }
 
-        public async Task CreateAsync(Event entity)
+        public async Task CreateAsync(Event entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -33,7 +32,7 @@ VALUES
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -52,7 +51,7 @@ WHERE
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Event>> GetAllAsync()
+        public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -69,7 +68,7 @@ FROM
             return await DbConnection.QueryAsync<Event>(Sql, null, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<Event> GetAsync(Guid id)
+        public async Task<Event> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -89,7 +88,7 @@ WHERE
             return result.First();
         }
 
-        public async Task UpdateAsync(Event entity)
+        public async Task UpdateAsync(Event entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"

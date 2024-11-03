@@ -1,44 +1,33 @@
-﻿using EPAM.Persistence.Entities;
-using EPAM.Persistence.UnitOfWork.Interface;
+﻿using EPAM.Services.Interfaces;
+using EPAM.Web.Controllers.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPAM.Web.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class VenueController : ControllerBase
+    public sealed class VenueController : BaseController<VenueController>
     {
-        private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private readonly ISectionService _sectionService;
+        private readonly IVenueService _venueService;
 
-        public VenueController(IUnitOfWorkFactory unitOfWorkFactory)
+        public VenueController(ISectionService sectionService, IVenueService venueService, ILogger<VenueController> logger) : base(logger)
         {
-            _unitOfWorkFactory = unitOfWorkFactory;
+            _sectionService = sectionService;
+            _venueService = venueService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetVenuesAsync()
+
+        [HttpGet("{id:guid}/sections")]
+        public async Task<IActionResult> GetSectionsAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            //using(var transaction = _unitOfWork.BeginTransaction())
-            //{
-            //    await _unitOfWork.SeatRepository.CreateAsync(new Seat { Number = 1 }).ConfigureAwait(false);
-            //    //transaction.Commit();
-            //    await _unitOfWork.SeatRepository.CreateAsync(new Seat { Number = 2 }).ConfigureAwait(false);
-            //    //transaction.Rollback();
-            //}
-            using var unitOfWork = _unitOfWorkFactory.Create();
-            var result = await unitOfWork.VenueRepository.GetAllAsync().ConfigureAwait(false);
+            var result = await _sectionService.GetSectionsByVenueId(id, cancellationToken).ConfigureAwait(false);
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateVenueAsync([FromBody] string name)
+        [HttpGet("list")]
+        public async Task<IActionResult> GetAllVenuesAsync(CancellationToken cancellationToken)
         {
-            using var unitOfWork = _unitOfWorkFactory.Create();
-            unitOfWork.BeginTransaction();
-            await unitOfWork.VenueRepository.CreateAsync(new Venue { Name = name }).ConfigureAwait(false);
-            unitOfWork.RollbackTransaction();
-            await unitOfWork.VenueRepository.CreateAsync(new Venue { Name = name }).ConfigureAwait(false);
-            return Ok();
+            var result = await _venueService.GetListAsync(cancellationToken).ConfigureAwait(false);
+            return Ok(result);
         }
     }
 }

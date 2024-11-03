@@ -1,6 +1,4 @@
-﻿using EPAM.EF.Entities;
-
-namespace EPAM.Persistence.Entities
+﻿namespace EPAM.Persistence.Entities
 {
     public class Raw
     {

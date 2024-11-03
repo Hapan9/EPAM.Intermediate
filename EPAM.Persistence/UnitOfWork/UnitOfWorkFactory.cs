@@ -15,7 +15,7 @@ namespace EPAM.Persistence.UnitOfWork
 
         public IUnitOfWork Create()
         {
-            _unitOfWork = new UnitOfWork(_dbConnection);
+            //_unitOfWork = new UnitOfWork(_dbConnection);
             _dbConnection.Open();
             return _unitOfWork;
         }

@@ -1,5 +1,4 @@
-﻿using EPAM.EF.Entities;
-using EPAM.Persistence.Entities;
+﻿using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Interfaces;
 using System.Data;
 
@@ -17,5 +16,9 @@ namespace EPAM.Persistence.UnitOfWork.Interface
         IRepository<Seat> SeatRepository { get; }
         IRepository<Section> SectionRepository { get; }
         IRepository<Venue> VenueRepository { get; }
+        IRepository<PriceOption> PriceOptionRepository { get; }
+        IRepository<SeatStatus> SeatStatusRepository { get; }
+        IRepository<Order> OrderRepository { get; }
+        IRepository<Payment> PaymentRepository { get; }
     }
 }

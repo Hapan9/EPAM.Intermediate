@@ -1,4 +1,4 @@
-﻿using EPAM.EF.Entities;
+﻿using EPAM.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -10,5 +10,9 @@
 
         public Guid VenueId { get; set; }
         public virtual Venue? Venue { get; set; }
+
+        public virtual List<SeatStatus>? SeatStatuses { get; set; }
+        public virtual List<PriceOption>? PriceOptions { get; set; }
+        public virtual List<Order>? Orders { get; set; }
     }
 }

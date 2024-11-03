@@ -1,19 +1,18 @@
 ﻿using Dapper;
-using EPAM.EF.Entities;
+using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Abstraction;
-using EPAM.Persistence.Repositories.Interfaces;
 using System.Data;
 
 namespace EPAM.Persistence.Repositories
 {
-    public sealed class SeatRepository : BaseRepository, IRepository<Seat>
+    public sealed class SeatRepository : BaseRepository//, IRepository<Seat>
     {
         public SeatRepository(IDbConnection dbConnection, IDbTransaction? dbTransaction) : base(dbConnection, dbTransaction)
         {
 
         }
 
-        public async Task CreateAsync(Seat entity)
+        public async Task CreateAsync(Seat entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -33,7 +32,7 @@ VALUES
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -52,7 +51,7 @@ WHERE
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Seat>> GetAllAsync()
+        public async Task<IEnumerable<Seat>> GetAllAsync(CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -68,7 +67,7 @@ FROM
             return await DbConnection.QueryAsync<Seat>(Sql, null, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<Seat> GetAsync(Guid id)
+        public async Task<Seat> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -92,7 +91,7 @@ WHERE
             return result.First();
         }
 
-        public async Task UpdateAsync(Seat entity)
+        public async Task UpdateAsync(Seat entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"

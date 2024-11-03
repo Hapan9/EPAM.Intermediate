@@ -2,6 +2,7 @@
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EPAM.EF.Repositories
 {
@@ -11,38 +12,43 @@ namespace EPAM.EF.Repositories
         {
         }
 
-        public async Task CreateAsync(Raw entity)
+        public async Task CreateAsync(Raw entity, CancellationToken cancellationToken)
         {
-            await Context.Raws.AddAsync(entity).ConfigureAwait(false);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.Raws.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Expression<Func<Raw, bool>> expression, CancellationToken cancellationToken)
         {
-            var entity = await Context.Raws.FindAsync(id).ConfigureAwait(false);
-            if (entity == null) return;
+            var enteties = await Context.Raws.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
+            if (enteties.Count == 0) return;
 
-            Context.Raws.Remove(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            Context.Raws.RemoveRange(enteties);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Raw>> GetAllAsync()
+        public async Task<IEnumerable<Raw>> GetListAsync(CancellationToken cancellationToken)
         {
-            return await Context.Raws.ToListAsync().ConfigureAwait(false);
+            return await Context.Raws.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<Raw> GetAsync(Guid id)
+        public async Task<IEnumerable<Raw>> GetListAsync(Expression<Func<Raw, bool>> expression, CancellationToken cancellationToken)
         {
-            return await Context.Raws.FirstAsync(e => e.Id == id).ConfigureAwait(false);
+            return await Context.Raws.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync(Raw entity)
+        public async Task<Raw> GetAsync(Expression<Func<Raw, bool>> expression, CancellationToken cancellationToken)
         {
-            var ent = await Context.Raws.FindAsync(entity.Id).ConfigureAwait(false);
+            return await Context.Raws.FirstAsync(expression, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task UpdateAsync(Raw entity, CancellationToken cancellationToken)
+        {
+            var ent = await Context.Raws.FindAsync(entity.Id, cancellationToken).ConfigureAwait(false);
             if (ent == null) return;
 
             Context.Raws.Entry(ent).CurrentValues.SetValues(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

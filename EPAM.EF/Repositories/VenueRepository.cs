@@ -2,6 +2,7 @@
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EPAM.EF.Repositories
 {
@@ -12,38 +13,43 @@ namespace EPAM.EF.Repositories
 
         }
 
-        public async Task CreateAsync(Venue entity)
+        public async Task CreateAsync(Venue entity, CancellationToken cancellationToken)
         {
-            await Context.Venues.AddAsync(entity).ConfigureAwait(false);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.Venues.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Expression<Func<Venue, bool>> expression, CancellationToken cancellationToken)
         {
-            var entity = await Context.Venues.FindAsync(id).ConfigureAwait(false);
-            if (entity == null) return;
+            var enteties = await Context.Venues.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
+            if (enteties.Count == 0) return;
 
-            Context.Venues.Remove(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            Context.Venues.RemoveRange(enteties);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Venue>> GetAllAsync()
+        public async Task<IEnumerable<Venue>> GetListAsync(CancellationToken cancellationToken)
         {
-            return await Context.Venues.ToListAsync().ConfigureAwait(false);
+            return await Context.Venues.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<Venue> GetAsync(Guid id)
+        public async Task<IEnumerable<Venue>> GetListAsync(Expression<Func<Venue, bool>> expression, CancellationToken cancellationToken)
         {
-            return await Context.Venues.FirstAsync(e => e.Id == id).ConfigureAwait(false);
+            return await Context.Venues.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync(Venue entity)
+        public async Task<Venue> GetAsync(Expression<Func<Venue, bool>> expression, CancellationToken cancellationToken)
         {
-            var ent = await Context.Venues.FindAsync(entity.Id).ConfigureAwait(false);
+            return await Context.Venues.FirstAsync(expression, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task UpdateAsync(Venue entity, CancellationToken cancellationToken)
+        {
+            var ent = await Context.Venues.FindAsync(entity.Id, cancellationToken).ConfigureAwait(false);
             if (ent == null) return;
 
             Context.Venues.Entry(ent).CurrentValues.SetValues(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

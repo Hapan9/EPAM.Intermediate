@@ -6,7 +6,7 @@ namespace EPAM.EF.UnitOfWork
     public sealed class UnitOfWorkFactory : IUnitOfWorkFactory
     {
         private readonly IDbConnection _dbConnection;
-        private IUnitOfWork _unitOfWork;
+        private IUnitOfWork? _unitOfWork;
 
         public UnitOfWorkFactory(IDbConnection dbConnection)
         {
@@ -22,7 +22,7 @@ namespace EPAM.EF.UnitOfWork
 
         public void Dispose()
         {
-            _unitOfWork.Dispose();
+            _unitOfWork?.Dispose();
             _dbConnection.Dispose();
         }
     }

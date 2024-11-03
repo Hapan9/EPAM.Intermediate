@@ -1,6 +1,4 @@
-﻿using EPAM.Persistence.Entities;
-
-namespace EPAM.EF.Entities
+﻿namespace EPAM.Persistence.Entities
 {
     public class Seat
     {
@@ -10,5 +8,9 @@ namespace EPAM.EF.Entities
 
         public Guid RawId { get; set; }
         public virtual Raw? Raw { get; set; }
+
+        public virtual List<SeatStatus>? SeatStatuses { get; set; }
+        public virtual List<PriceOption>? PriceOptions { get; set; }
+        public virtual List<Order>? Orders { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace EPAM.EF.Repositories.Abstraction
 {
-    public class BaseRepository
+    public abstract class BaseRepository
     {
         protected readonly SystemContext Context;
 

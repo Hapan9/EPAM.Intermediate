@@ -1,18 +1,17 @@
 ﻿using Dapper;
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Abstraction;
-using EPAM.Persistence.Repositories.Interfaces;
 using System.Data;
 
 namespace EPAM.Persistence.Repositories
 {
-    public sealed class RawRepository : BaseRepository, IRepository<Raw>
+    public sealed class RawRepository : BaseRepository//, IRepository<Raw>
     {
         public RawRepository(IDbConnection dbConnection, IDbTransaction? dbTransaction) : base(dbConnection, dbTransaction)
         {
         }
 
-        public async Task CreateAsync(Raw entity)
+        public async Task CreateAsync(Raw entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -32,7 +31,7 @@ VALUES
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -51,7 +50,7 @@ WHERE
             await DbConnection.QueryAsync(Sql, param, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Raw>> GetAllAsync()
+        public async Task<IEnumerable<Raw>> GetAllAsync(CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -67,7 +66,7 @@ FROM
             return await DbConnection.QueryAsync<Raw>(Sql, null, DbTransaction, Timeout, CommandType.Text).ConfigureAwait(false);
         }
 
-        public async Task<Raw> GetAsync(Guid id)
+        public async Task<Raw> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"
@@ -91,7 +90,7 @@ WHERE
             return result.First();
         }
 
-        public async Task UpdateAsync(Raw entity)
+        public async Task UpdateAsync(Raw entity, CancellationToken cancellationToken)
         {
             #region sql
             const string Sql = @"

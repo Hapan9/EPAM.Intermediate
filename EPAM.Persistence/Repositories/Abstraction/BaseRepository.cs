@@ -8,24 +8,6 @@ namespace EPAM.Persistence.Repositories.Abstraction
         protected readonly IDbTransaction? DbTransaction;
         protected const int Timeout = 300;
 
-        //protected IDbConnection DbConnection
-        //{
-        //    get
-        //    {
-        //        if(_dbTransaction == null)
-        //        {
-        //            return _dbConnection;
-        //        }
-
-        //        if(_dbTransaction.Connection == null)
-        //        {
-        //            return _dbConnection;
-        //        }
-
-        //        return _dbTransaction.Connection;
-        //    }
-        //}
-
         protected BaseRepository(IDbConnection dbConnection, IDbTransaction? dbTransaction)
         {
             DbConnection = dbConnection;

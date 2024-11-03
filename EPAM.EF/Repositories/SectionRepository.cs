@@ -2,6 +2,7 @@
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EPAM.EF.Repositories
 {
@@ -11,38 +12,43 @@ namespace EPAM.EF.Repositories
         {
         }
 
-        public async Task CreateAsync(Section entity)
+        public async Task CreateAsync(Section entity, CancellationToken cancellationToken)
         {
-            await Context.Sections.AddAsync(entity).ConfigureAwait(false);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.Sections.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Expression<Func<Section, bool>> expression, CancellationToken cancellationToken)
         {
-            var entity = await Context.Sections.FindAsync(id).ConfigureAwait(false);
-            if (entity == null) return;
+            var enteties = await Context.Sections.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
+            if (enteties.Count == 0) return;
 
-            Context.Sections.Remove(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            Context.Sections.RemoveRange(enteties);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Section>> GetAllAsync()
+        public async Task<IEnumerable<Section>> GetListAsync(CancellationToken cancellationToken)
         {
-            return await Context.Sections.ToListAsync().ConfigureAwait(false);
+            return await Context.Sections.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<Section> GetAsync(Guid id)
+        public async Task<IEnumerable<Section>> GetListAsync(Expression<Func<Section, bool>> expression, CancellationToken cancellationToken)
         {
-            return await Context.Sections.FirstAsync(e => e.Id == id).ConfigureAwait(false);
+            return await Context.Sections.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync(Section entity)
+        public async Task<Section> GetAsync(Expression<Func<Section, bool>> expression, CancellationToken cancellationToken)
         {
-            var ent = await Context.Sections.FindAsync(entity.Id).ConfigureAwait(false);
+            return await Context.Sections.FirstAsync(expression, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task UpdateAsync(Section entity, CancellationToken cancellationToken)
+        {
+            var ent = await Context.Sections.FindAsync(entity.Id, cancellationToken).ConfigureAwait(false);
             if (ent == null) return;
 
             Context.Sections.Entry(ent).CurrentValues.SetValues(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

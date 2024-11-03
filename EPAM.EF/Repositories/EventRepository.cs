@@ -2,6 +2,7 @@
 using EPAM.Persistence.Entities;
 using EPAM.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EPAM.EF.Repositories
 {
@@ -11,38 +12,43 @@ namespace EPAM.EF.Repositories
         {
         }
 
-        public async Task CreateAsync(Event entity)
+        public async Task CreateAsync(Event entity, CancellationToken cancellationToken)
         {
-            await Context.Events.AddAsync(entity).ConfigureAwait(false);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.Events.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Expression<Func<Event, bool>> expression, CancellationToken cancellationToken)
         {
-            var entity = await Context.Events.FindAsync(id).ConfigureAwait(false);
-            if (entity == null) return;
+            var enteties = await Context.Events.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
+            if (enteties.Count == 0) return;
 
-            Context.Events.Remove(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            Context.Events.RemoveRange(enteties);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Event>> GetAllAsync()
+        public async Task<IEnumerable<Event>> GetListAsync(CancellationToken cancellationToken)
         {
-            return await Context.Events.ToListAsync().ConfigureAwait(false);
+            return await Context.Events.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<Event> GetAsync(Guid id)
+        public async Task<IEnumerable<Event>> GetListAsync(Expression<Func<Event, bool>> expression, CancellationToken cancellationToken)
         {
-            return await Context.Events.FirstAsync(e => e.Id == id).ConfigureAwait(false);
+            return await Context.Events.Where(expression).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateAsync(Event entity)
+        public async Task<Event> GetAsync(Expression<Func<Event, bool>> expression, CancellationToken cancellationToken)
         {
-            var ent = await Context.Venues.FindAsync(entity.Id).ConfigureAwait(false);
+            return await Context.Events.FirstAsync(expression, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task UpdateAsync(Event entity, CancellationToken cancellationToken)
+        {
+            var ent = await Context.Venues.FindAsync(entity.Id, cancellationToken).ConfigureAwait(false);
             if (ent == null) return;
 
             Context.Venues.Entry(ent).CurrentValues.SetValues(entity);
-            await Context.SaveChangesAsync().ConfigureAwait(false);
+            await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
