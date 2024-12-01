@@ -1,5 +1,5 @@
 ﻿using AutoFixture;
-using EPAM.Persistence.Entities;
+using EPAM.EF.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPAM.EF.FakeData

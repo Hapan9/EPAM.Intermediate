@@ -14,8 +14,4 @@
     <PackageReference Include="System.Runtime" Version="4.3.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EPAM.Persistence\EPAM.Persistence.csproj" />
-  </ItemGroup>
-
 </Project>

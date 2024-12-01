@@ -1,10 +1,12 @@
-﻿using EPAM.EF.FakeData;
-using EPAM.Persistence.Entities;
+﻿using EPAM.EF.Entities;
+using EPAM.EF.FakeData;
+using EPAM.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EPAM.EF
 {
-    public class SystemContext : DbContext
+    public class SystemContext : DbContext, ISystemContext
     {
         public SystemContext(DbContextOptions options) : base(options)
         {
@@ -28,6 +30,16 @@ namespace EPAM.EF
         public DbSet<Order> Orders { get; set; }
 
         public DbSet<Payment> Payments { get; set; }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            return await Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public DbSet<T> GetDbSet<T>() where T : class
+        {
+            return Set<T>();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

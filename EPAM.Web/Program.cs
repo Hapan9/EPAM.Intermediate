@@ -1,9 +1,11 @@
-using EPAM.Persistence.UnitOfWork.Interface;
+using EPAM.EF;
+using EPAM.EF.Interfaces;
+using EPAM.EF.UnitOfWork;
+using EPAM.EF.UnitOfWork.Interfaces;
 using EPAM.Services;
 using EPAM.Services.Interfaces;
 using EPAM.Services.Profiles;
-using Microsoft.Data.SqlClient;
-using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +16,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-builder.Services.AddScoped<IDbConnection>(options => new SqlConnection("Server=(localdb)\\mssqllocaldb;Database=Testsql;Trusted_Connection=True;"));
+builder.Services.AddDbContext<ISystemContext, SystemContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Testsql;Trusted_Connection=True;"));
 
-builder.Services.AddScoped<IUnitOfWorkFactory, EPAM.EF.UnitOfWork.UnitOfWorkFactory>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ISectionService, SectionService>();
@@ -41,3 +43,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

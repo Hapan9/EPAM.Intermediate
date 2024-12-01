@@ -1,19 +1,11 @@
-﻿using System.Linq.Expressions;
-
-namespace EPAM.Persistence.Repositories.Interfaces
+﻿namespace EPAM.Persistence.Repositories.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        Task<T> GetAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken);
-
-        Task<IEnumerable<T>> GetListAsync(CancellationToken cancellationToken);
-
-        Task<IEnumerable<T>> GetListAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken);
-
-        Task CreateAsync(T entity, CancellationToken cancellationToken);
-
-        Task UpdateAsync(T entity, CancellationToken cancellationToken);
-
-        Task DeleteAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken);
+        Task<T> GetAsync(Guid id);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task CreateAsync(T entity);
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(Guid id);
     }
 }

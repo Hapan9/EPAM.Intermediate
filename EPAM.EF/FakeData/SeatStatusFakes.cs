@@ -1,5 +1,5 @@
 ﻿using AutoFixture;
-using EPAM.Persistence.Entities;
+using EPAM.EF.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPAM.EF.FakeData
@@ -21,7 +21,7 @@ namespace EPAM.EF.FakeData
                     .Without(o => o.Event)
                     .With(o => o.EventId, eventR.Id)
                     .With(o => o.SeatId, seat.Id)
-                    .With(o => o.Status, Persistence.Entities.Enums.SeatStatus.Available)
+                    .With(o => o.Status, Entities.Enums.SeatStatus.Available)
                     .Without(o => o.LastStatusChangeDt)
                     .Create();
 

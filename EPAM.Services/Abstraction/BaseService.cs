@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using EPAM.Persistence.UnitOfWork.Interface;
+using EPAM.EF.UnitOfWork.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace EPAM.Services.Abstraction
 {
     public abstract class BaseService<T>
     {
-        protected readonly IUnitOfWorkFactory UnitOfWorkFactory;
+        protected readonly IUnitOfWork UnitOfWork;
         protected readonly IMapper Mapper;
         protected readonly ILogger<T> Logger;
 
-        public BaseService(IUnitOfWorkFactory unitOfWorkFactory, IMapper mapper, ILogger<T> logger)
+        public BaseService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<T> logger)
         {
-            UnitOfWorkFactory = unitOfWorkFactory;
+            UnitOfWork = unitOfWork;
             Mapper = mapper;
             Logger = logger;
         }

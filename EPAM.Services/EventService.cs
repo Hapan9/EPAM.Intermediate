@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EPAM.Persistence.UnitOfWork.Interface;
+using EPAM.EF.UnitOfWork.Interfaces;
 using EPAM.Services.Abstraction;
 using EPAM.Services.Dtos;
 using EPAM.Services.Interfaces;
@@ -9,14 +9,13 @@ namespace EPAM.Services
 {
     public sealed class EventService : BaseService<EventService>, IEventService
     {
-        public EventService(IUnitOfWorkFactory unitOfWorkFactory, IMapper mapper, ILogger<EventService> logger) : base(unitOfWorkFactory, mapper, logger)
+        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<EventService> logger) : base(unitOfWork, mapper, logger)
         {
         }
 
         public async Task<List<EventDto>> GetListAsync(CancellationToken cancellationToken)
         {
-            using var unitOfWork = UnitOfWorkFactory.Create();
-            var result = await unitOfWork.EventRepository.GetListAsync(cancellationToken).ConfigureAwait(false);
+            var result = await UnitOfWork.EventRepository.GetListAsync(cancellationToken).ConfigureAwait(false);
             return Mapper.Map<List<EventDto>>(result);
         }
     }

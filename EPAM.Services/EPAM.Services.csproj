@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EPAM.EF\EPAM.EF.csproj" />
-    <ProjectReference Include="..\EPAM.Persistence\EPAM.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

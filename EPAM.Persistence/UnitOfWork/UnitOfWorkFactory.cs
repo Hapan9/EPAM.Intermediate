@@ -1,4 +1,4 @@
-﻿using EPAM.Persistence.UnitOfWork.Interface;
+﻿using EPAM.Persistence.UnitOfWork.Interfaces;
 using System.Data;
 
 namespace EPAM.Persistence.UnitOfWork

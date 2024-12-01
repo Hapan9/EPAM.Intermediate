@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EPAM.Persistence.Entities;
+using EPAM.EF.Entities;
 using EPAM.Services.Dtos;
 using EPAM.Services.Dtos.Order;
 

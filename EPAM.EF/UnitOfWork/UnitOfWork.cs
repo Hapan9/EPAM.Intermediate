@@ -1,19 +1,16 @@
-﻿using EPAM.EF.Repositories;
-using EPAM.Persistence.Entities;
-using EPAM.Persistence.Repositories.Interfaces;
-using EPAM.Persistence.UnitOfWork.Interface;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Data;
-using System.Data.Common;
+﻿using EPAM.EF.Entities;
+using EPAM.EF.Interfaces;
+using EPAM.EF.Repositories.Abstraction;
+using EPAM.EF.Repositories.Interfaces;
+using EPAM.EF.UnitOfWork.Interfaces;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EPAM.EF.UnitOfWork
 {
     public sealed class UnitOfWork : IUnitOfWork
     {
-        private readonly SystemContext _context;
-        private readonly IDbConnection _connection;
-        private IDbTransaction? _transaction;
+        private readonly ISystemContext _context;
+        private IDbContextTransaction? _transaction;
         private IRepository<Event>? _eventRepository;
         private IRepository<Raw>? _rawRepository;
         private IRepository<Seat>? _seatRepository;
@@ -24,59 +21,48 @@ namespace EPAM.EF.UnitOfWork
         private IRepository<Order>? _orderRepository;
         private IRepository<Payment>? _paymentRepository;
 
-        public UnitOfWork(IDbConnection connection)
+        public UnitOfWork(ISystemContext context)
         {
-            _connection = connection;
-            var options = new DbContextOptionsBuilder<SystemContext>()
-                .UseSqlServer((DbConnection)connection)
-                .LogTo(Console.WriteLine, LogLevel.Information)
-                .Options;
-            _context = new SystemContext(options);
+            _context = context;
         }
 
-        public IRepository<Event> EventRepository => _eventRepository ??= new EventRepository(_context);
-        public IRepository<Raw> RawRepository => _rawRepository ??= new RawRepository(_context);
-        public IRepository<Seat> SeatRepository => _seatRepository ??= new SeatRepository(_context);
-        public IRepository<Section> SectionRepository => _sectionRepository ??= new SectionRepository(_context);
-        public IRepository<Venue> VenueRepository => _venueRepository ??= new VenueRepository(_context);
-        public IRepository<PriceOption> PriceOptionRepository => _priceOptionRepository ??= new PriceOptionRepository(_context);
-        public IRepository<SeatStatus> SeatStatusRepository => _seatStatusRepository ??= new SeatStatusRepository(_context);
-        public IRepository<Order> OrderRepository => _orderRepository ??= new OrderRepository(_context);
-        public IRepository<Payment> PaymentRepository => _paymentRepository ??= new PaymentRepository(_context);
+        public IRepository<Event> EventRepository => _eventRepository ??= new BaseRepository<Event>(_context);
+        public IRepository<Raw> RawRepository => _rawRepository ??= new BaseRepository<Raw>(_context);
+        public IRepository<Seat> SeatRepository => _seatRepository ??= new BaseRepository<Seat>(_context);
+        public IRepository<Section> SectionRepository => _sectionRepository ??= new BaseRepository<Section>(_context);
+        public IRepository<Venue> VenueRepository => _venueRepository ??= new BaseRepository<Venue>(_context);
+        public IRepository<PriceOption> PriceOptionRepository => _priceOptionRepository ??= new BaseRepository<PriceOption>(_context);
+        public IRepository<SeatStatus> SeatStatusRepository => _seatStatusRepository ??= new BaseRepository<SeatStatus>(_context);
+        public IRepository<Order> OrderRepository => _orderRepository ??= new BaseRepository<Order>(_context);
+        public IRepository<Payment> PaymentRepository => _paymentRepository ??= new BaseRepository<Payment>(_context);
 
-        public void BeginTransaction()
+        public async Task BeginTransaction(CancellationToken cancellationToken = default)
         {
-            BeginTransaction(IsolationLevel.ReadCommitted);
+            _transaction = await _context.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public void BeginTransaction(IsolationLevel isolationLevel)
+        public async Task CommitTransaction(CancellationToken cancellationToken)
         {
-            _transaction = _connection.BeginTransaction(isolationLevel);
-            _context.Database.UseTransaction((DbTransaction?)_transaction);
-        }
+            if (_transaction == null) return;
 
-        public void CommitTransaction()
-        {
-            _transaction?.Commit();
-            _transaction?.Dispose();
-            _transaction = null;
-            _context.Database.UseTransaction((DbTransaction?)_transaction);
+            await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose()
         {
             _transaction?.Dispose();
-            _transaction = null;
-            _context.Database.UseTransaction((DbTransaction?)_transaction);
-            _connection.Close();
         }
 
-        public void RollbackTransaction()
+        public async Task RollbackTransaction(CancellationToken cancellationToken)
         {
-            _transaction?.Rollback();
-            _transaction?.Dispose();
-            _transaction = null;
-            _context.Database.UseTransaction((DbTransaction?)_transaction);
+            if (_transaction == null) return;
+
+            await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+        {
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
