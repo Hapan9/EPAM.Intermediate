@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EPAM.EF\EPAM.EF.csproj" />
+    <ProjectReference Include="..\..\EPAM.EF\EPAM.EF.csproj" />
   </ItemGroup>
 
   <ItemGroup>
