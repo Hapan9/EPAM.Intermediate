@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using EPAM.Cache.Enums;
+using EPAM.Cache.Interfaces;
 using EPAM.EF.Entities;
 using EPAM.EF.Entities.Enums;
 using EPAM.EF.UnitOfWork.Interfaces;
@@ -11,8 +13,12 @@ namespace EPAM.Services
 {
     public sealed class OrderService : BaseService<OrderService>, IOrderService
     {
-        public OrderService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger) : base(unitOfWork, mapper, logger)
+        const string BookedKey = "SeatBooked";
+        private readonly ISystemCache _systemCache;
+
+        public OrderService(ISystemCache systemCache, IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger) : base(unitOfWork, mapper, logger)
         {
+            _systemCache = systemCache;
         }
 
         public async Task<List<GetOrderDto>> GetOrdersByCartIdAsync(Guid cartId, CancellationToken cancellationToken)
@@ -23,13 +29,20 @@ namespace EPAM.Services
 
         public async Task<List<GetOrderDto>> CreateOrderAsync(Guid cartId, CreateOrderDto createOrderDto, CancellationToken cancellationToken)
         {
-            var order = Mapper.Map<Order>(createOrderDto, opt =>
+            var cacheResult = await _systemCache.Cache(CacheTypes.DistributedCache).GetAsync<EF.Entities.Enums.SeatStatus?>($"{BookedKey}-{createOrderDto.EventId}-{createOrderDto.SeatId}", cancellationToken);
+            if (cacheResult == null || cacheResult == EF.Entities.Enums.SeatStatus.Available)
             {
-                opt.AfterMap((_, dest) => dest.CartId = cartId);
-            });
+                var order = Mapper.Map<Order>(createOrderDto, opt =>
+                {
+                    opt.AfterMap((_, dest) => dest.CartId = cartId);
+                });
 
-            await UnitOfWork.OrderRepository.CreateAsync(order, cancellationToken).ConfigureAwait(false);
-            await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await UnitOfWork.OrderRepository.CreateAsync(order, cancellationToken).ConfigureAwait(false);
+                await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            Logger.LogInformation($"Seat {createOrderDto.SeatId} is unavailable");
+
             //var seatStatus = await unitOfWork.SeatStatusRepository.GetAsync(s => s.SeatId == createOrderDto.SeatId, cancellationToken).ConfigureAwait(false);
             //seatStatus.Status = Persistence.Entities.Enums.SeatStatus.Booked;
             //seatStatus.LastStatusChangeDt = DateTime.UtcNow;
@@ -62,7 +75,6 @@ namespace EPAM.Services
             foreach (var order in orders)
             {
                 order.PaymentId = payment.Id;
-                await UnitOfWork.OrderRepository.UpdateAsync(order, cancellationToken).ConfigureAwait(false);
             }
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -70,11 +82,16 @@ namespace EPAM.Services
             {
                 seatStatus.Status = EF.Entities.Enums.SeatStatus.Booked;
                 seatStatus.LastStatusChangeDt = DateTime.UtcNow;
-                await UnitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
             }
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             await UnitOfWork.CommitTransaction(cancellationToken).ConfigureAwait(false);
+
+
+            foreach (var seatStatus in seatStatuses)
+            {
+                await _systemCache.Cache(CacheTypes.DistributedCache).Set($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", EF.Entities.Enums.SeatStatus.Booked, cancellationToken);
+            }
 
             return payment.Id;
         }

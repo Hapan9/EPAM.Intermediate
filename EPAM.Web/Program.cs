@@ -1,3 +1,6 @@
+using EPAM.Cache;
+using EPAM.Cache.Interfaces;
+using EPAM.Cache.Models;
 using EPAM.EF;
 using EPAM.EF.Interfaces;
 using EPAM.EF.UnitOfWork;
@@ -6,6 +9,7 @@ using EPAM.Services;
 using EPAM.Services.Interfaces;
 using EPAM.Services.Profiles;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,16 +20,47 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-builder.Services.AddDbContext<ISystemContext, SystemContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Testsql;Trusted_Connection=True;"));
+builder.Services.AddDbContext<ISystemContext, SystemContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+#region Services SetUp
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ISectionService, SectionService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+#endregion
+
+#region Cache SetUp
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ISystemCache, SystemCache>();
+builder.Services.AddDistributedSqlServerCache(options =>
+{
+
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
+    #region Create Cache DB
+
+    var distributedOptions = builder.Configuration.GetSection("CacheOptions:DistributedOptions").Get<DistributedOptions>();
+
+    new Process
+    {
+        StartInfo =
+        {
+            FileName = "dotnet",
+            Arguments = $"sql-cache create \"{connectionString}\" {distributedOptions!.SchemaName} {distributedOptions!.TableName}"
+        }
+    }.Start();
+
+    #endregion
+
+    options.ConnectionString = connectionString;
+    options.SchemaName = distributedOptions.SchemaName;
+    options.TableName = distributedOptions.TableName;
+});
+builder.Services.AddResponseCaching();
+#endregion
 
 var app = builder.Build();
 
@@ -37,6 +72,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseResponseCaching();
 
 app.UseAuthorization();
 

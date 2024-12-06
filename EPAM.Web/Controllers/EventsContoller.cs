@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPAM.Web.Controllers
 {
+    [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, NoStore = false)]
     public sealed class EventsController : BaseController<EventsController>
     {
         private readonly ISeatService _seatService;

@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.SqlServer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EPAM.Cache\EPAM.Cache.csproj" />
     <ProjectReference Include="..\EPAM.EF\EPAM.EF.csproj" />
   </ItemGroup>
 

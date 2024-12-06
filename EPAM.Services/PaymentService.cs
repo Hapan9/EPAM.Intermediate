@@ -32,14 +32,12 @@ namespace EPAM.Services
             await UnitOfWork.BeginTransaction(cancellationToken).ConfigureAwait(false);
 
             payment.Status = PaymentStatus.Completed;
-            await UnitOfWork.PaymentRepository.UpdateAsync(payment, cancellationToken).ConfigureAwait(false);
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             foreach (var seatStatus in seatsStatuses)
             {
                 seatStatus.Status = SeatStatus.Sold;
                 seatStatus.LastStatusChangeDt = DateTime.UtcNow;
-                await UnitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
             }
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -54,14 +52,12 @@ namespace EPAM.Services
             await UnitOfWork.BeginTransaction(cancellationToken).ConfigureAwait(false);
 
             payment.Status = PaymentStatus.Declined;
-            await UnitOfWork.PaymentRepository.UpdateAsync(payment, cancellationToken).ConfigureAwait(false);
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             foreach (var seatStatus in seatsStatuses)
             {
                 seatStatus.Status = SeatStatus.Available;
                 seatStatus.LastStatusChangeDt = DateTime.UtcNow;
-                await UnitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
             }
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
