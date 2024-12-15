@@ -31,8 +31,8 @@ namespace EPAM.Services.Profiles
             CreateMap<Order, GetOrderDto>()
                 .ReverseMap();
 
-            CreateMap<Order, CreateOrderDto>()
-                .ReverseMap();
+            CreateMap<CreateOrderDto, Order>();
+            //.ForMember(dest => dest.Version, src => Guid.NewGuid());
 
             CreateMap<Payment, PaymentDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));

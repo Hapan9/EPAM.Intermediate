@@ -4,6 +4,7 @@ using EPAM.EF.Repositories.Abstraction;
 using EPAM.EF.Repositories.Interfaces;
 using EPAM.EF.UnitOfWork.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace EPAM.EF.UnitOfWork
 {
@@ -36,16 +37,24 @@ namespace EPAM.EF.UnitOfWork
         public IRepository<Order> OrderRepository => _orderRepository ??= new BaseRepository<Order>(_context);
         public IRepository<Payment> PaymentRepository => _paymentRepository ??= new BaseRepository<Payment>(_context);
 
-        public async Task BeginTransaction(CancellationToken cancellationToken = default)
+        public async Task<IDbContextTransaction> BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
-            _transaction = await _context.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+            _transaction = await _context.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
+            return _transaction;
         }
 
-        public async Task CommitTransaction(CancellationToken cancellationToken)
+
+        public async Task BeginTransaction(CancellationToken cancellationToken = default)
+        {
+            await BeginTransaction(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task CommitTransaction(CancellationToken cancellationToken = default)
         {
             if (_transaction == null) return;
 
             await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.DisposeAsync();
         }
 
         public void Dispose()
@@ -53,14 +62,15 @@ namespace EPAM.EF.UnitOfWork
             _transaction?.Dispose();
         }
 
-        public async Task RollbackTransaction(CancellationToken cancellationToken)
+        public async Task RollbackTransaction(CancellationToken cancellationToken = default)
         {
             if (_transaction == null) return;
 
             await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.DisposeAsync();
         }
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

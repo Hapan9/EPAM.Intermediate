@@ -2,7 +2,6 @@
 using EPAM.EF.Interfaces;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EPAM.IntegrationTests.Util
@@ -28,8 +27,10 @@ namespace EPAM.IntegrationTests.Util
                             services.Remove(serviceDescriptor);
                         }
 
-                        services.AddDbContext<ISystemContext, SystemContext>(c => c.UseInMemoryDatabase("InMemoryDB")
-                            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+                        //services.AddDbContext<ISystemContext, SystemContext>(c => c.UseInMemoryDatabase("InMemoryDB")
+                        //    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+
+                        services.AddDbContext<ISystemContext, SystemContext>(c => c.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=EPAM.Intermediate.Tests;Integrated Security=True;Trusted_Connection=True;"));
                     });
 
                 });

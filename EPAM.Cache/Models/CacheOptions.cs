@@ -6,6 +6,8 @@
 
         public int AbsoluteExpiration { get; set; }
 
+        public bool IsSynchronized { get; set; }
+
         public required DistributedOptions DistributedOptions { get; set; }
     }
 }

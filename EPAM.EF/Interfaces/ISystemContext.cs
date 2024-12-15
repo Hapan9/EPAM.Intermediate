@@ -1,6 +1,7 @@
 ﻿using EPAM.EF.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace EPAM.EF.Interfaces
 {
@@ -24,7 +25,7 @@ namespace EPAM.EF.Interfaces
 
         DbSet<Payment> Payments { get; set; }
 
-        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+        Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default);
 
         DbSet<T> GetDbSet<T>() where T : class;
 

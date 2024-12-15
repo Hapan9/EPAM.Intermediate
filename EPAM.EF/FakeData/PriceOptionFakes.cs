@@ -16,13 +16,13 @@ namespace EPAM.EF.FakeData
                 foreach (var seat in seats)
                 {
                     var priceOption = fixture
-                    .Build<PriceOption>()
-                    .Without(o => o.Seat)
-                    .Without(o => o.Event)
-                    .Without(o => o.Order)
-                    .With(o => o.EventId, eventR.Id)
-                    .With(o => o.SeatId, seat.Id)
-                    .Create();
+                        .Build<PriceOption>()
+                        .Without(o => o.Seat)
+                        .Without(o => o.Event)
+                        .Without(o => o.Order)
+                        .With(o => o.EventId, eventR.Id)
+                        .With(o => o.SeatId, seat.Id)
+                        .Create();
 
                     priceOptions.Add(priceOption);
                 }

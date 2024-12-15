@@ -4,6 +4,6 @@ namespace EPAM.Cache.Interfaces
 {
     public interface ISystemCache
     {
-        ICache Cache(CacheTypes cacheTypes);
+        ICache GetCache(CacheTypes cacheTypes);
     }
 }

@@ -8,12 +8,14 @@ using EPAM.Services.Abstraction;
 using EPAM.Services.Dtos.Order;
 using EPAM.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace EPAM.Services
 {
     public sealed class OrderService : BaseService<OrderService>, IOrderService
     {
         const string BookedKey = "SeatBooked";
+        const CacheTypes CacheType = CacheTypes.MemoryCache;
         private readonly ISystemCache _systemCache;
 
         public OrderService(ISystemCache systemCache, IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger) : base(unitOfWork, mapper, logger)
@@ -29,24 +31,46 @@ namespace EPAM.Services
 
         public async Task<List<GetOrderDto>> CreateOrderAsync(Guid cartId, CreateOrderDto createOrderDto, CancellationToken cancellationToken)
         {
-            var cacheResult = await _systemCache.Cache(CacheTypes.DistributedCache).GetAsync<EF.Entities.Enums.SeatStatus?>($"{BookedKey}-{createOrderDto.EventId}-{createOrderDto.SeatId}", cancellationToken);
-            if (cacheResult == null || cacheResult == EF.Entities.Enums.SeatStatus.Available)
-            {
-                var order = Mapper.Map<Order>(createOrderDto, opt =>
-                {
-                    opt.AfterMap((_, dest) => dest.CartId = cartId);
-                });
+            var cacheResult = await _systemCache.GetCache(CacheType).GetAsync<EF.Entities.Enums.SeatStatus?>($"{BookedKey}-{createOrderDto.EventId}-{createOrderDto.SeatId}", cancellationToken);
 
-                await UnitOfWork.OrderRepository.CreateAsync(order, cancellationToken).ConfigureAwait(false);
-                await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            if (cacheResult != null && cacheResult != EF.Entities.Enums.SeatStatus.Available)
+            {
+                Logger.LogInformation($"Seat {createOrderDto.SeatId} is unavailable");
+                throw new Exception($"Seat {createOrderDto.SeatId} is unavailable");
             }
 
-            Logger.LogInformation($"Seat {createOrderDto.SeatId} is unavailable");
+            await UnitOfWork.BeginTransaction(IsolationLevel.RepeatableRead, cancellationToken);
 
-            //var seatStatus = await unitOfWork.SeatStatusRepository.GetAsync(s => s.SeatId == createOrderDto.SeatId, cancellationToken).ConfigureAwait(false);
-            //seatStatus.Status = Persistence.Entities.Enums.SeatStatus.Booked;
-            //seatStatus.LastStatusChangeDt = DateTime.UtcNow;
-            //await unitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
+            var seatStatus = await UnitOfWork.SeatStatusRepository
+                    .GetAsync(s => s.SeatId == createOrderDto.SeatId && s.EventId == createOrderDto.EventId)
+                    .ConfigureAwait(false);
+
+            if (seatStatus.Status != EF.Entities.Enums.SeatStatus.Available)
+            {
+                await UnitOfWork.RollbackTransaction(cancellationToken);
+
+                await _systemCache.GetCache(CacheType).SetAsync($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", seatStatus.Status, cancellationToken);
+                Logger.LogInformation($"Seat {createOrderDto.SeatId} is unavailable");
+                throw new Exception($"Seat {createOrderDto.SeatId} is unavailable");
+            }
+
+            var order = Mapper.Map<Order>(createOrderDto, opt =>
+            {
+                opt.AfterMap((_, dest) => dest.CartId = cartId);
+            });
+
+            await UnitOfWork.OrderRepository.CreateAsync(order, cancellationToken).ConfigureAwait(false);
+            await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            seatStatus.Status = EF.Entities.Enums.SeatStatus.Booked;
+            seatStatus.LastStatusChangeDt = DateTime.UtcNow;
+            seatStatus.Version = Guid.NewGuid();
+
+            await UnitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
+            await UnitOfWork.CommitTransaction(cancellationToken);
+
+            await _systemCache.GetCache(CacheType).SetAsync($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", seatStatus.Status, cancellationToken);
+
             var result = await UnitOfWork.OrderRepository.GetListAsync(o => o.CartId == cartId, cancellationToken).ConfigureAwait(false);
             return Mapper.Map<List<GetOrderDto>>(result);
         }
@@ -67,7 +91,7 @@ namespace EPAM.Services
                 Status = PaymentStatus.Pending
             };
 
-            await UnitOfWork.BeginTransaction(cancellationToken).ConfigureAwait(false);
+            await UnitOfWork.BeginTransaction(IsolationLevel.RepeatableRead, cancellationToken).ConfigureAwait(false);
 
             await UnitOfWork.PaymentRepository.CreateAsync(payment, cancellationToken).ConfigureAwait(false);
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -82,6 +106,7 @@ namespace EPAM.Services
             {
                 seatStatus.Status = EF.Entities.Enums.SeatStatus.Booked;
                 seatStatus.LastStatusChangeDt = DateTime.UtcNow;
+                seatStatus.Version = Guid.NewGuid();
             }
             await UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -90,7 +115,7 @@ namespace EPAM.Services
 
             foreach (var seatStatus in seatStatuses)
             {
-                await _systemCache.Cache(CacheTypes.DistributedCache).Set($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", EF.Entities.Enums.SeatStatus.Booked, cancellationToken);
+                await _systemCache.GetCache(CacheType).SetAsync($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", EF.Entities.Enums.SeatStatus.Booked, cancellationToken);
             }
 
             return payment.Id;

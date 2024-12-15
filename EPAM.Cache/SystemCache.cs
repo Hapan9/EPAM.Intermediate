@@ -23,7 +23,7 @@ namespace EPAM.Cache
         /// </summary>
         /// <param name="cacheType"></param>
         /// <returns></returns>
-        public ICache Cache(CacheTypes cacheType)
+        public ICache GetCache(CacheTypes cacheType)
         {
             if (cacheType == CacheTypes.MemoryCache)
             {

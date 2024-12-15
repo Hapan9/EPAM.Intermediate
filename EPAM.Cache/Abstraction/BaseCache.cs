@@ -1,4 +1,5 @@
-﻿using EPAM.Cache.Models;
+﻿using EPAM.Cache.Interfaces;
+using EPAM.Cache.Models;
 using EPAM.EF.Entities.Abstraction;
 using EPAM.EF.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ namespace EPAM.Cache.Abstraction
     {
         private readonly ISystemContext _context;
         protected readonly CacheOptions? CacheOptions;
+        protected static object LockObject = new object();
 
         protected BaseCache(IConfiguration configuration, ISystemContext context)
         {

@@ -3,6 +3,7 @@ using EPAM.EF.FakeData;
 using EPAM.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace EPAM.EF
 {
@@ -31,11 +32,6 @@ namespace EPAM.EF
 
         public DbSet<Payment> Payments { get; set; }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
-        {
-            return await Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        }
-
         public DbSet<T> GetDbSet<T>() where T : class
         {
             return Set<T>();
@@ -58,6 +54,11 @@ namespace EPAM.EF
             modelBuilder.GeneratePriceOptions(events, seats);
 
             modelBuilder.GenerateSeatStatus(events, seats);
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
+        {
+            return await Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
     }
 }

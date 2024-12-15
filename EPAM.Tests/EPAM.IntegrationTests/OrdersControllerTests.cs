@@ -107,11 +107,11 @@ namespace EPAM.IntegrationTests
         public async Task PutAsync_BookSeatsForCartAsync()
         {
             //Arrange
-            var seatStatus = await App.Context.SeatsStatuses.FirstAsync();
+            var priceOption = await App.Context.PriceOptions.FirstAsync();
             var order = _fixture.Build<Order>()
-                .With(o => o.EventId, seatStatus.EventId)
-                .With(o => o.PriceOptionId, seatStatus.Id)
-                .With(o => o.SeatId, seatStatus.SeatId)
+                .With(o => o.EventId, priceOption.EventId)
+                .With(o => o.PriceOptionId, priceOption.Id)
+                .With(o => o.SeatId, priceOption.SeatId)
                 .Without(o => o.Seat)
                 .Without(o => o.Event)
                 .Without(o => o.PriceOption)

@@ -1,4 +1,5 @@
 ﻿using EPAM.EF.Entities.Abstraction;
+using System.ComponentModel.DataAnnotations;
 
 namespace EPAM.EF.Entities
 {
@@ -13,5 +14,8 @@ namespace EPAM.EF.Entities
 
         public Guid SeatId { get; set; }
         public virtual Seat? Seat { get; set; }
+
+        [ConcurrencyCheck]
+        public Guid Version { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace EPAM.Cache
             return result;
         }
 
-        public async Task Set<T>(string key, T item, CancellationToken cancellationToken = default)
+        public async Task SetAsync<T>(string key, T item, CancellationToken cancellationToken = default)
         {
             var json = JsonConvert.SerializeObject(item);
 

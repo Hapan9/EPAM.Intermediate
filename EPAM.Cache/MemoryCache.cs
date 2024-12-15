@@ -18,7 +18,18 @@ namespace EPAM.Cache
 
         public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
-            var result = _memoryCache.Get<T>(key);
+            T? result;
+            if (CacheOptions != null && CacheOptions.IsSynchronized)
+            {
+                lock (LockObject)
+                {
+                    result = _memoryCache.Get<T>(key);
+                }
+            }
+            else
+            {
+                result = _memoryCache.Get<T>(key);
+            }
 
             if (typeof(T).IsSubclassOf(typeof(Entity)))
             {
@@ -28,7 +39,7 @@ namespace EPAM.Cache
             return await Task.FromResult(result);
         }
 
-        public async Task Set<T>(string key, T item, CancellationToken cancellationToken = default)
+        public async Task SetAsync<T>(string key, T item, CancellationToken cancellationToken = default)
         {
             var options = new MemoryCacheEntryOptions();
 
@@ -38,7 +49,18 @@ namespace EPAM.Cache
                     .SetSlidingExpiration(TimeSpan.FromSeconds(CacheOptions.SlidingExpirationInSeconds))
                     .SetAbsoluteExpiration(TimeSpan.FromSeconds(CacheOptions.AbsoluteExpiration));
             }
-            _memoryCache.Set(key, item, options);
+
+            if (CacheOptions != null && CacheOptions.IsSynchronized)
+            {
+                lock (LockObject)
+                {
+                    _memoryCache.Set(key, item, options);
+                }
+            }
+            else
+            {
+                _memoryCache.Set(key, item, options);
+            }
 
             await Task.CompletedTask;
         }
