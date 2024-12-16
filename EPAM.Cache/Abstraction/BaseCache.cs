@@ -1,5 +1,4 @@
-﻿using EPAM.Cache.Interfaces;
-using EPAM.Cache.Models;
+﻿using EPAM.Cache.Models;
 using EPAM.EF.Entities.Abstraction;
 using EPAM.EF.Interfaces;
 using Microsoft.Extensions.Configuration;

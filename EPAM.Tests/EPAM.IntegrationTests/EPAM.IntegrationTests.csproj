@@ -10,6 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings.Testing.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.Testing.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />

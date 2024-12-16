@@ -1,7 +1,8 @@
 ﻿using EPAM.EF;
 using EPAM.EF.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EPAM.IntegrationTests.Util
@@ -16,23 +17,10 @@ namespace EPAM.IntegrationTests.Util
             var build = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
-                    builder.ConfigureServices(services =>
+                    builder.ConfigureAppConfiguration(configuration =>
                     {
-                        var serviceDescriptors = services
-                        .Where(s => s.ServiceType == typeof(SystemContext) || s.ServiceType == typeof(ISystemContext) || s.ServiceType == typeof(DbContextOptions) || s.ServiceType == typeof(DbContextOptions<SystemContext>))
-                        .ToList();
-
-                        foreach (var serviceDescriptor in serviceDescriptors)
-                        {
-                            services.Remove(serviceDescriptor);
-                        }
-
-                        //services.AddDbContext<ISystemContext, SystemContext>(c => c.UseInMemoryDatabase("InMemoryDB")
-                        //    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
-
-                        services.AddDbContext<ISystemContext, SystemContext>(c => c.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=EPAM.Intermediate.Tests;Integrated Security=True;Trusted_Connection=True;"));
+                        configuration.AddJsonFile($"{Environment.CurrentDirectory}/appsettings.Testing.json");
                     });
-
                 });
 
             Client = build.CreateClient();
