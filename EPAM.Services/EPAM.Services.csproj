@@ -8,11 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EPAM.Cache\EPAM.Cache.csproj" />
     <ProjectReference Include="..\EPAM.EF\EPAM.EF.csproj" />
+    <ProjectReference Include="..\EPAM.RabbitMQ\EPAM.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>

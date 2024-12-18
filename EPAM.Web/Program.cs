@@ -5,7 +5,10 @@ using EPAM.EF;
 using EPAM.EF.Interfaces;
 using EPAM.EF.UnitOfWork;
 using EPAM.EF.UnitOfWork.Interfaces;
+using EPAM.RabbitMQ;
+using EPAM.RabbitMQ.Interfaces;
 using EPAM.Services;
+using EPAM.Services.Backgrounds;
 using EPAM.Services.Interfaces;
 using EPAM.Services.Profiles;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +16,7 @@ using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers().AddNewtonsoftJson();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
@@ -31,6 +31,10 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
+
+builder.Services.AddHostedService<DbUpdaterService>();
 #endregion
 
 #region Cache SetUp

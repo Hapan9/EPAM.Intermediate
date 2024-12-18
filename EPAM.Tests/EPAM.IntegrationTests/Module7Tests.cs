@@ -1,4 +1,5 @@
-﻿using EPAM.IntegrationTests.Abstraction;
+﻿using EPAM.EF.Entities.Enums;
+using EPAM.IntegrationTests.Abstraction;
 using EPAM.Services.Dtos.Order;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -43,11 +44,15 @@ namespace EPAM.IntegrationTests
             }
 
             await Task.WhenAll(tasks);
+            var seatStatusUpdated = await App.Context.SeatsStatuses
+                .FirstAsync(s => s.SeatId == priceOption.SeatId && s.EventId == priceOption.EventId);
+            await App.Context.SeatsStatuses.Entry(seatStatusUpdated).ReloadAsync();
 
             //Assert
             Assert.Equal(1000, statuses.Count);
             Assert.Single(statuses, HttpStatusCode.OK);
-            Assert.All(statuses.Where(s => s != HttpStatusCode.InternalServerError).Order().Skip(1), s => Assert.Equal(HttpStatusCode.BadRequest, s));
+            Assert.Equal(SeatStatus.Booked, seatStatusUpdated.Status);
+            Assert.Equal(999, statuses.Where(s => s == HttpStatusCode.BadRequest).Count());
         }
     }
 }

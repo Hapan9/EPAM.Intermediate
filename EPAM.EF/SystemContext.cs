@@ -58,7 +58,7 @@ namespace EPAM.EF
 
         public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
-            return await Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+            return await Database.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
         }
     }
 }

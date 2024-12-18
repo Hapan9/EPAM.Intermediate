@@ -4,7 +4,6 @@ using EPAM.Cache.Interfaces;
 using EPAM.EF.UnitOfWork.Interfaces;
 using EPAM.Services.Abstraction;
 using EPAM.Services.Dtos;
-using EPAM.Services.Dtos.Order;
 using EPAM.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 

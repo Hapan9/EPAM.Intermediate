@@ -28,6 +28,8 @@ namespace EPAM.IntegrationTests.Util
             _serviceScope = build.Services.CreateScope();
 
             _systemContext = _serviceScope.ServiceProvider.GetRequiredService<SystemContext>();
+            _systemContext.Database.EnsureDeleted();
+            _systemContext.Database.EnsureCreated();
 
         }
 

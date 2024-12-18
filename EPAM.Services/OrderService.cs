@@ -4,6 +4,8 @@ using EPAM.Cache.Interfaces;
 using EPAM.EF.Entities;
 using EPAM.EF.Entities.Enums;
 using EPAM.EF.UnitOfWork.Interfaces;
+using EPAM.RabbitMQ.Interfaces;
+using EPAM.RabbitMQ.Publishers;
 using EPAM.Services.Abstraction;
 using EPAM.Services.Dtos.Order;
 using EPAM.Services.Interfaces;
@@ -16,10 +18,12 @@ namespace EPAM.Services
     {
         const string BookedKey = "SeatBooked";
         const CacheTypes CacheType = CacheTypes.MemoryCache;
+        private readonly IRabbitMqClient _rabbitMqClient;
         private readonly ISystemCache _systemCache;
 
-        public OrderService(ISystemCache systemCache, IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger) : base(unitOfWork, mapper, logger)
+        public OrderService(IRabbitMqClient rabbitMqClient, ISystemCache systemCache, IUnitOfWork unitOfWork, IMapper mapper, ILogger<OrderService> logger) : base(unitOfWork, mapper, logger)
         {
+            _rabbitMqClient = rabbitMqClient;
             _systemCache = systemCache;
         }
 
@@ -66,12 +70,19 @@ namespace EPAM.Services
             seatStatus.LastStatusChangeDt = DateTime.UtcNow;
             seatStatus.Version = Guid.NewGuid();
 
-            await UnitOfWork.SeatStatusRepository.UpdateAsync(seatStatus, cancellationToken).ConfigureAwait(false);
+            await UnitOfWork.SaveChangesAsync(cancellationToken);
+
             await UnitOfWork.CommitTransaction(cancellationToken);
 
             await _systemCache.GetCache(CacheType).SetAsync($"{BookedKey}-{seatStatus.EventId}-{seatStatus.SeatId}", seatStatus.Status, cancellationToken);
 
             var result = await UnitOfWork.OrderRepository.GetListAsync(o => o.CartId == cartId, cancellationToken).ConfigureAwait(false);
+
+            var notificationPublisher = new NotificationPublisher(seatStatus)
+                .UseSmsNotification()
+                .UseEmailNotification();
+            await _rabbitMqClient.PublishMessage(cancellationToken, notificationPublisher).ConfigureAwait(false);
+
             return Mapper.Map<List<GetOrderDto>>(result);
         }
 

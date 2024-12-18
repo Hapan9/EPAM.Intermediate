@@ -43,7 +43,6 @@ namespace EPAM.EF.UnitOfWork
             return _transaction;
         }
 
-
         public async Task BeginTransaction(CancellationToken cancellationToken = default)
         {
             await BeginTransaction(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);

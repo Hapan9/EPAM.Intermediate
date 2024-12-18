@@ -68,12 +68,16 @@ namespace EPAM.IntegrationTests
             var responseMessage = await response.Content.ReadAsStringAsync();
             var responseObject = JsonConvert.DeserializeObject<List<GetOrderDto>>(responseMessage);
             var order = await App.Context.Orders.FirstOrDefaultAsync(o => o.CartId == cartId);
+            var seatStatusUpdated = await App.Context.SeatsStatuses.FirstAsync(s => s.SeatId == priceOptions.SeatId && s.EventId == priceOptions.EventId);
+
+            await App.Context.SeatsStatuses.Entry(seatStatusUpdated).ReloadAsync();
 
             //Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(order);
             Assert.NotNull(responseObject);
             Assert.Contains(order.CartId, responseObject.Select(o => o.CartId));
+            Assert.Equal(EF.Entities.Enums.SeatStatus.Booked, seatStatusUpdated.Status);
         }
 
         [Fact]
