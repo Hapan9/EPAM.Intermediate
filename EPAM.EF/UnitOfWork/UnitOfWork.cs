@@ -23,6 +23,7 @@ namespace EPAM.EF.UnitOfWork
         private IOrderRepository? _orderRepository;
         private IRepository<Payment>? _paymentRepository;
         private INotificationRepository? _notificationRepository;
+        private INotificationResultRepository _notificationResultRepository;
 
         public UnitOfWork(ISystemContext context)
         {
@@ -39,6 +40,7 @@ namespace EPAM.EF.UnitOfWork
         public IOrderRepository OrderRepository => _orderRepository ??= new OrderRepository(_context);
         public IRepository<Payment> PaymentRepository => _paymentRepository ??= new BaseRepository<Payment>(_context);
         public INotificationRepository NotificationRepository => _notificationRepository ??= new NotificationRepository(_context);
+        public INotificationResultRepository NotificationResultRepository => _notificationResultRepository ??= new NotificationResultRepository(_context);
 
         public async Task<IDbContextTransaction> BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {

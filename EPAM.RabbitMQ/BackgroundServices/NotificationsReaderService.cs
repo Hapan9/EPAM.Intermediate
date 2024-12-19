@@ -1,5 +1,7 @@
-﻿using EPAM.EF.Entities.Enums.Notifications;
+﻿using EPAM.EF.Entities;
+using EPAM.EF.Entities.Enums.Notifications;
 using EPAM.EF.UnitOfWork.Interfaces;
+using EPAM.RabbitMQ.Consumers;
 using EPAM.RabbitMQ.Interfaces;
 using EPAM.RabbitMQ.Publishers.Strategy;
 using EPAM.RabbitMQ.Publishers.Strategy.Interfaces;
@@ -64,6 +66,12 @@ namespace EPAM.RabbitMQ.BackgroundServices
                     catch (Exception ex)
                     {
                         notification.Status = NotificationStatus.Failure;
+                        var notificationResult = new NotificationResult
+                        {
+                            Reason = ex.Message,
+                            Status = NotificationResultStatus.Failure
+                        };
+                        ConsumersResults.AddNotificationResult(notificationResult);
                         continue;
                     }
                 }

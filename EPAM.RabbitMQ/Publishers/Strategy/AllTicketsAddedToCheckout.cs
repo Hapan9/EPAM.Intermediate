@@ -35,7 +35,7 @@ namespace EPAM.RabbitMQ.Publishers.Strategy
             if (Notification.NotificationParams == null || Notification.NotificationParams.Count == 0)
             {
                 title = $"{title}\r\n{message}";
-                return new UserNotificationPublisher(title); ;
+                return new UserNotificationPublisher(Notification, title); ;
             }
 
             if (Notification.NotificationParams.Exists(p => string.Equals(p.Key, "Name", StringComparison.CurrentCultureIgnoreCase)))
@@ -48,7 +48,7 @@ namespace EPAM.RabbitMQ.Publishers.Strategy
                 title = $"{title}\r\n{message}";
             }
 
-            var publisher = new UserNotificationPublisher(title);
+            var publisher = new UserNotificationPublisher(Notification, title);
 
             if (Notification.NotificationParams.Exists(p => string.Equals(p.Key, "sms", StringComparison.CurrentCultureIgnoreCase)))
             {

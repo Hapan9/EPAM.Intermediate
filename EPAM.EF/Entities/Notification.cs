@@ -18,5 +18,6 @@ namespace EPAM.EF.Entities
         public string? Content { get; set; }
 
         public virtual List<NotificationParam>? NotificationParams { get; set; }
+        public virtual List<NotificationResult>? NotificationResults { get; set; }
     }
 }

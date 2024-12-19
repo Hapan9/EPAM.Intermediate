@@ -36,6 +36,8 @@ namespace EPAM.EF
 
         public DbSet<NotificationParam> NotificationsParams { get; set; }
 
+        public DbSet<NotificationResult> NotificationsResults { get; set; }
+
         public DbSet<T> GetDbSet<T>() where T : class
         {
             return Set<T>();

@@ -29,6 +29,8 @@ namespace EPAM.EF.Interfaces
 
         DbSet<NotificationParam> NotificationsParams { get; set; }
 
+        DbSet<NotificationResult> NotificationsResults { get; set; }
+
         Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default);
 
         DbSet<T> GetDbSet<T>() where T : class;

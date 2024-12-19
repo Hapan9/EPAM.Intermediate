@@ -20,7 +20,7 @@ namespace EPAM.RabbitMQ.Publishers.Strategy
 
             var message = $"You booked seat №{bookedSeat.SeatNumber}, raw №{bookedSeat.RawNumber}, section {bookedSeat.SectionName}, venue {bookedSeat.VenueName}, event {bookedSeat.EventName} \r\nPrice - {bookedSeat.Price}";
 
-            var publisher = new UserNotificationPublisher(message);
+            var publisher = new UserNotificationPublisher(Notification, message);
 
             if (Notification.NotificationParams == null || Notification.NotificationParams.Count == 0) return publisher;
 

@@ -39,7 +39,9 @@ builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
 
 builder.Services.AddHostedService<DbUpdaterService>();
 builder.Services.AddHostedService<NotificationsReaderService>();
-builder.Services.AddHostedService<ConsumerService>();
+builder.Services.AddHostedService<SmsConsumerService>();
+builder.Services.AddHostedService<EmailConsumerService>();
+builder.Services.AddHostedService<ConsumersResultsService>();
 #endregion
 
 #region Cache SetUp

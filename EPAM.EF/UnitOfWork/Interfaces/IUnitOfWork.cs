@@ -23,5 +23,6 @@ namespace EPAM.EF.UnitOfWork.Interfaces
         IOrderRepository OrderRepository { get; }
         IRepository<Payment> PaymentRepository { get; }
         INotificationRepository NotificationRepository { get; }
+        INotificationResultRepository NotificationResultRepository { get; }
     }
 }

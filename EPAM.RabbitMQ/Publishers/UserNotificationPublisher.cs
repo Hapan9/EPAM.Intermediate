@@ -1,5 +1,8 @@
-﻿using EPAM.RabbitMQ.Publishers.Abstraction;
+﻿using EPAM.EF.Entities;
+using EPAM.RabbitMQ.Constants;
+using EPAM.RabbitMQ.Publishers.Abstraction;
 using RabbitMQ.Client;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,25 +12,24 @@ namespace EPAM.RabbitMQ.Publishers
     public class UserNotificationPublisher : BasePublisher
     {
         public string _header;
-        public const string MainHeader = "Notification";
-        public const string SmsHeader = "Sms";
-        public const string EmailHeader = "Email";
+        private readonly Notification notification;
 
-        public UserNotificationPublisher(string content) : base(content)
+        public UserNotificationPublisher(Notification notification, string content) : base(content)
         {
-            _header = MainHeader;
+            _header = UserNotificationConstants.MainHeader;
+            this.notification = notification;
         }
 
         public UserNotificationPublisher UseSmsNotification(bool useNotification = true)
         {
-            if (useNotification) _header += $".{SmsHeader}";
+            if (useNotification) _header += $".{UserNotificationConstants.SmsHeader}";
 
             return this;
         }
 
         public UserNotificationPublisher UseEmailNotification(bool useNotification = true)
         {
-            if (useNotification) _header += $".{EmailHeader}";
+            if (useNotification) _header += $".{UserNotificationConstants.EmailHeader}";
 
             return this;
         }
@@ -36,20 +38,14 @@ namespace EPAM.RabbitMQ.Publishers
         {
             var body = Encoding.UTF8.GetBytes(Content);
 
-            const string NotificationExchange = "Notification.Exchange";
-            const string EmailNotificationQueue = "Notification.Email";
-            const string SmsNotificationQueue = "Notification.Sms";
-
             using var channel = await connection.CreateChannelAsync(null, cancellationToken).ConfigureAwait(false);
 
-            await channel.ExchangeDeclareAsync(NotificationExchange, "topic", true, false, null, false, false, cancellationToken).ConfigureAwait(false);
-            await channel.QueueDeclareAsync(EmailNotificationQueue, true, false, false, null, false, false, cancellationToken).ConfigureAwait(true);
-            await channel.QueueDeclareAsync(SmsNotificationQueue, true, false, false, null, false, false, cancellationToken).ConfigureAwait(true);
-
-            await channel.QueueBindAsync(EmailNotificationQueue, NotificationExchange, $"{MainHeader}.#.{EmailHeader}.#", null, false, cancellationToken).ConfigureAwait(false);
-            await channel.QueueBindAsync(SmsNotificationQueue, NotificationExchange, $"{MainHeader}.#.{SmsHeader}.#", null, false, cancellationToken).ConfigureAwait(false);
-
-            await channel.BasicPublishAsync(NotificationExchange, _header, body, cancellationToken).ConfigureAwait(false);
+            var basicProperties = new BasicProperties();
+            basicProperties.Headers = new Dictionary<string, object?>
+            {
+                { "NotoficationId", notification.Id.ToString() }
+            };
+            await channel.BasicPublishAsync(RabbitMqConstants.NotificationExchange, _header, false, basicProperties, body, cancellationToken).ConfigureAwait(false);
         }
     }
 }
