@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\EPAM.EF\EPAM.EF.csproj" />
+    <ProjectReference Include="..\..\EPAM.RabbitMQ\EPAM.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\EPAM.Web\EPAM.Web.csproj" />
   </ItemGroup>
 

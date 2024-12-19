@@ -26,7 +26,7 @@ namespace EPAM.Services.Backgrounds
                 await unitOfWork.BeginTransaction(IsolationLevel.RepeatableRead, stoppingToken).ConfigureAwait(false);
 
                 var bookedSeats = await unitOfWork.SeatStatusRepository
-                    .GetListAsync(s => s.Status == SeatStatus.Booked && s.LastStatusChangeDt.HasValue && s.LastStatusChangeDt.Value.AddMinutes(15) < DateTime.Now,
+                    .GetListAsync(s => s.Status == SeatStatus.Booked && s.LastStatusChangeDt.HasValue && s.LastStatusChangeDt.Value.AddSeconds(30) < DateTime.Now,
                         stoppingToken)
                     .ConfigureAwait(false);
 

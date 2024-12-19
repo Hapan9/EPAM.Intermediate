@@ -1,5 +1,6 @@
 ﻿using EPAM.EF.Entities;
 using EPAM.EF.Interfaces;
+using EPAM.EF.Repositories;
 using EPAM.EF.Repositories.Abstraction;
 using EPAM.EF.Repositories.Interfaces;
 using EPAM.EF.UnitOfWork.Interfaces;
@@ -19,8 +20,9 @@ namespace EPAM.EF.UnitOfWork
         private IRepository<Venue>? _venueRepository;
         private IRepository<SeatStatus>? _seatStatusRepository;
         private IRepository<PriceOption>? _priceOptionRepository;
-        private IRepository<Order>? _orderRepository;
+        private IOrderRepository? _orderRepository;
         private IRepository<Payment>? _paymentRepository;
+        private INotificationRepository? _notificationRepository;
 
         public UnitOfWork(ISystemContext context)
         {
@@ -34,8 +36,9 @@ namespace EPAM.EF.UnitOfWork
         public IRepository<Venue> VenueRepository => _venueRepository ??= new BaseRepository<Venue>(_context);
         public IRepository<PriceOption> PriceOptionRepository => _priceOptionRepository ??= new BaseRepository<PriceOption>(_context);
         public IRepository<SeatStatus> SeatStatusRepository => _seatStatusRepository ??= new BaseRepository<SeatStatus>(_context);
-        public IRepository<Order> OrderRepository => _orderRepository ??= new BaseRepository<Order>(_context);
+        public IOrderRepository OrderRepository => _orderRepository ??= new OrderRepository(_context);
         public IRepository<Payment> PaymentRepository => _paymentRepository ??= new BaseRepository<Payment>(_context);
+        public INotificationRepository NotificationRepository => _notificationRepository ??= new NotificationRepository(_context);
 
         public async Task<IDbContextTransaction> BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {

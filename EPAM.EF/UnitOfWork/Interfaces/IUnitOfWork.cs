@@ -20,7 +20,8 @@ namespace EPAM.EF.UnitOfWork.Interfaces
         IRepository<Venue> VenueRepository { get; }
         IRepository<PriceOption> PriceOptionRepository { get; }
         IRepository<SeatStatus> SeatStatusRepository { get; }
-        IRepository<Order> OrderRepository { get; }
+        IOrderRepository OrderRepository { get; }
         IRepository<Payment> PaymentRepository { get; }
+        INotificationRepository NotificationRepository { get; }
     }
 }

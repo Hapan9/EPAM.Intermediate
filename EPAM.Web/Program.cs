@@ -6,6 +6,7 @@ using EPAM.EF.Interfaces;
 using EPAM.EF.UnitOfWork;
 using EPAM.EF.UnitOfWork.Interfaces;
 using EPAM.RabbitMQ;
+using EPAM.RabbitMQ.BackgroundServices;
 using EPAM.RabbitMQ.Interfaces;
 using EPAM.Services;
 using EPAM.Services.Backgrounds;
@@ -31,10 +32,14 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 
 builder.Services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
 
 builder.Services.AddHostedService<DbUpdaterService>();
+builder.Services.AddHostedService<NotificationsReaderService>();
+builder.Services.AddHostedService<ConsumerService>();
 #endregion
 
 #region Cache SetUp

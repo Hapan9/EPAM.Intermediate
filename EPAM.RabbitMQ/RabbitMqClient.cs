@@ -1,7 +1,6 @@
 ﻿using EPAM.RabbitMQ.Interfaces;
-using EPAM.RabbitMQ.Publishers.Interfaces;
+using EPAM.RabbitMQ.Publishers.Strategy.Interfaces;
 using RabbitMQ.Client;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +22,7 @@ namespace EPAM.RabbitMQ
             };
         }
 
-        private async Task<IConnection> GetConnection(CancellationToken cancellationToken = default)
+        public async Task<IConnection> GetConnection(CancellationToken cancellationToken = default)
         {
             if (_connection != null) return _connection;
 
@@ -34,30 +33,11 @@ namespace EPAM.RabbitMQ
             return connection;
         }
 
-        public async Task PublishMessage(params IPublisher[] publishers)
+        public async Task PublishMessage(IStrategy strategy, CancellationToken cancellationToken = default)
         {
             var connection = await GetConnection().ConfigureAwait(false);
-            List<Task> tasks = new List<Task>();
-            foreach (var publisher in publishers)
-            {
-                var task = publisher.PublishMessageAsync(connection);
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-        }
-
-        public async Task PublishMessage(CancellationToken cancellationToken = default, params IPublisher[] publishers)
-        {
-            var connection = await GetConnection(cancellationToken).ConfigureAwait(false);
-            List<Task> tasks = new List<Task>();
-            foreach (var publisher in publishers)
-            {
-                var task = publisher.PublishMessageAsync(connection, cancellationToken);
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            var publisher = strategy.CreatePublisher();
+            await publisher.PublishMessageAsync(connection, cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose()

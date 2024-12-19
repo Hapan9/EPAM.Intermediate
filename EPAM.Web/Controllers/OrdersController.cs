@@ -8,10 +8,12 @@ namespace EPAM.Web.Controllers
     public sealed class OrdersController : BaseController<OrdersController>
     {
         private readonly IOrderService _orderService;
+        private readonly INotificationService _notificationService;
 
-        public OrdersController(IOrderService orderService, ILogger<OrdersController> logger) : base(logger)
+        public OrdersController(IOrderService orderService, INotificationService notificationService, ILogger<OrdersController> logger) : base(logger)
         {
             _orderService = orderService;
+            _notificationService = notificationService;
         }
 
         [HttpGet("carts/{cartId:guid}")]
@@ -34,6 +36,7 @@ namespace EPAM.Web.Controllers
             try
             {
                 var result = await _orderService.CreateOrderAsync(cartId, createOrderDto, cancellationToken).ConfigureAwait(false);
+                await _notificationService.NotifySeatBooked(createOrderDto.PriceOptionId, cancellationToken).ConfigureAwait(false);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -62,6 +65,7 @@ namespace EPAM.Web.Controllers
             try
             {
                 var result = await _orderService.BookAllSeatsAsyc(cartId, cancellationToken).ConfigureAwait(false);
+                await _notificationService.NotifySeatsBooked(cartId, cancellationToken).ConfigureAwait(false);
                 return Ok(result);
             }
             catch (Exception ex)

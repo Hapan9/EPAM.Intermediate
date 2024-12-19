@@ -1,4 +1,5 @@
-﻿using EPAM.Services.Dtos.Order;
+﻿using AutoFixture;
+using EPAM.Services.Dtos.Order;
 using EPAM.Services.Interfaces;
 using EPAM.Web.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,13 @@ namespace EPAM.Web.UnitTests
     public sealed class OrderControllerTests
     {
         private readonly Mock<IOrderService> _orderServiceMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly Mock<ILogger<OrdersController>> _loggerMock;
 
         public OrderControllerTests()
         {
             _orderServiceMock = new Mock<IOrderService>();
+            _notificationServiceMock = new Mock<INotificationService>();
             _loggerMock = new Mock<ILogger<OrdersController>>();
         }
 
@@ -23,7 +26,7 @@ namespace EPAM.Web.UnitTests
         public async Task GetOrdersByCartIdAsync_ShouldRetunOk()
         {
             //Arrange
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.GetOrdersByCartIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>());
@@ -40,7 +43,7 @@ namespace EPAM.Web.UnitTests
         {
             //Arrange
             _orderServiceMock.Setup(m => m.GetOrdersByCartIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.GetOrdersByCartIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>());
@@ -55,16 +58,18 @@ namespace EPAM.Web.UnitTests
         public async Task CreateOrdersForCartAsync_ShouldRetunOk()
         {
             //Arrange
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
-            var result = await controller.CreateOrdersForCartAsync(It.IsAny<Guid>(), It.IsAny<CreateOrderDto>(), It.IsAny<CancellationToken>());
+            var dto = new Fixture().Create<CreateOrderDto>();
+            var result = await controller.CreateOrdersForCartAsync(It.IsAny<Guid>(), dto, It.IsAny<CancellationToken>());
             var okResult = result as OkObjectResult;
 
             //Assert
             Assert.NotNull(okResult);
             Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
             _orderServiceMock.Verify(m => m.CreateOrderAsync(It.IsAny<Guid>(), It.IsAny<CreateOrderDto>(), It.IsAny<CancellationToken>()), Times.Once);
+            _notificationServiceMock.Verify(m => m.NotifySeatBooked(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -72,7 +77,7 @@ namespace EPAM.Web.UnitTests
         {
             //Arrange
             _orderServiceMock.Setup(m => m.CreateOrderAsync(It.IsAny<Guid>(), It.IsAny<CreateOrderDto>(), It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.CreateOrdersForCartAsync(It.IsAny<Guid>(), It.IsAny<CreateOrderDto>(), It.IsAny<CancellationToken>());
@@ -87,7 +92,7 @@ namespace EPAM.Web.UnitTests
         public async Task DeleteOrdersForCartAsync_ShouldRetunOk()
         {
             //Arrange
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.DeleteOrdersForCartAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>());
@@ -104,7 +109,7 @@ namespace EPAM.Web.UnitTests
         {
             //Arrange
             _orderServiceMock.Setup(m => m.DeleteOrderAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.DeleteOrdersForCartAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>());
@@ -119,7 +124,7 @@ namespace EPAM.Web.UnitTests
         public async Task BookSeatsForCartAsync_ShouldRetunOk()
         {
             //Arrange
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.BookSeatsForCartAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>());
@@ -129,6 +134,7 @@ namespace EPAM.Web.UnitTests
             Assert.NotNull(okResult);
             Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
             _orderServiceMock.Verify(m => m.BookAllSeatsAsyc(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
+            _notificationServiceMock.Verify(m => m.NotifySeatsBooked(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -136,7 +142,7 @@ namespace EPAM.Web.UnitTests
         {
             //Arrange
             _orderServiceMock.Setup(m => m.BookAllSeatsAsyc(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
-            var controller = new OrdersController(_orderServiceMock.Object, _loggerMock.Object);
+            var controller = new OrdersController(_orderServiceMock.Object, _notificationServiceMock.Object, _loggerMock.Object);
 
             //Act
             var result = await controller.BookSeatsForCartAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>());

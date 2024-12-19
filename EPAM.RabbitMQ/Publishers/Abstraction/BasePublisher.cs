@@ -7,11 +7,11 @@ namespace EPAM.RabbitMQ.Publishers.Abstraction
 {
     public abstract class BasePublisher : IPublisher
     {
-        protected readonly object PublishObject;
+        protected readonly string Content;
 
-        public BasePublisher(object publishObject)
+        public BasePublisher(string content)
         {
-            PublishObject = publishObject;
+            Content = content;
         }
 
         public abstract Task PublishMessageAsync(IConnection connection, CancellationToken cancellationToken = default);

@@ -1,5 +1,4 @@
 ﻿using EPAM.RabbitMQ.Publishers.Abstraction;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;
 using System.Threading;
@@ -7,26 +6,26 @@ using System.Threading.Tasks;
 
 namespace EPAM.RabbitMQ.Publishers
 {
-    public class NotificationPublisher : BasePublisher
+    public class UserNotificationPublisher : BasePublisher
     {
         public string _header;
         public const string MainHeader = "Notification";
         public const string SmsHeader = "Sms";
         public const string EmailHeader = "Email";
 
-        public NotificationPublisher(object publishObject) : base(publishObject)
+        public UserNotificationPublisher(string content) : base(content)
         {
             _header = MainHeader;
         }
 
-        public NotificationPublisher UseSmsNotification(bool useNotification = true)
+        public UserNotificationPublisher UseSmsNotification(bool useNotification = true)
         {
             if (useNotification) _header += $".{SmsHeader}";
 
             return this;
         }
 
-        public NotificationPublisher UseEmailNotification(bool useNotification = true)
+        public UserNotificationPublisher UseEmailNotification(bool useNotification = true)
         {
             if (useNotification) _header += $".{EmailHeader}";
 
@@ -35,15 +34,13 @@ namespace EPAM.RabbitMQ.Publishers
 
         public override async Task PublishMessageAsync(IConnection connection, CancellationToken cancellationToken = default)
         {
-
-            var json = JsonConvert.SerializeObject(PublishObject);
-            var body = Encoding.UTF8.GetBytes(json);
+            var body = Encoding.UTF8.GetBytes(Content);
 
             const string NotificationExchange = "Notification.Exchange";
             const string EmailNotificationQueue = "Notification.Email";
             const string SmsNotificationQueue = "Notification.Sms";
 
-            using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            using var channel = await connection.CreateChannelAsync(null, cancellationToken).ConfigureAwait(false);
 
             await channel.ExchangeDeclareAsync(NotificationExchange, "topic", true, false, null, false, false, cancellationToken).ConfigureAwait(false);
             await channel.QueueDeclareAsync(EmailNotificationQueue, true, false, false, null, false, false, cancellationToken).ConfigureAwait(true);

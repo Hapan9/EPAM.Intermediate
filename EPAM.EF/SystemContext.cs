@@ -32,6 +32,10 @@ namespace EPAM.EF
 
         public DbSet<Payment> Payments { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
+
+        public DbSet<NotificationParam> NotificationsParams { get; set; }
+
         public DbSet<T> GetDbSet<T>() where T : class
         {
             return Set<T>();

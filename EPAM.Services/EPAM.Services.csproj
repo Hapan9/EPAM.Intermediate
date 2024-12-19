@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\EPAM.Cache\EPAM.Cache.csproj" />
     <ProjectReference Include="..\EPAM.EF\EPAM.EF.csproj" />
-    <ProjectReference Include="..\EPAM.RabbitMQ\EPAM.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>

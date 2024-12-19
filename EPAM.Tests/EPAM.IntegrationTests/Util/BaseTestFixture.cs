@@ -1,5 +1,7 @@
 ﻿using EPAM.EF;
 using EPAM.EF.Interfaces;
+using EPAM.RabbitMQ.BackgroundServices;
+using EPAM.Services.Backgrounds;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,18 @@ namespace EPAM.IntegrationTests.Util
                     builder.ConfigureAppConfiguration(configuration =>
                     {
                         configuration.AddJsonFile($"{Environment.CurrentDirectory}/appsettings.Testing.json");
+                    });
+
+                    builder.ConfigureServices(services =>
+                    {
+                        var serviceDescriptors = services
+                            .Where(s => s.ImplementationType == typeof(DbUpdaterService) || s.ImplementationType == typeof(NotificationsReaderService))
+                            .ToList();
+
+                        foreach (var serviceDescriptor in serviceDescriptors)
+                        {
+                            services.Remove(serviceDescriptor);
+                        }
                     });
                 });
 
