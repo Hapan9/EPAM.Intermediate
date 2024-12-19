@@ -25,6 +25,7 @@ namespace EPAM.Services.Backgrounds
 
                 await unitOfWork.BeginTransaction(IsolationLevel.RepeatableRead, stoppingToken).ConfigureAwait(false);
 
+                //30 sec instead of 15 min just to simplify other modules tests
                 var bookedSeats = await unitOfWork.SeatStatusRepository
                     .GetListAsync(s => s.Status == SeatStatus.Booked && s.LastStatusChangeDt.HasValue && s.LastStatusChangeDt.Value.AddSeconds(30) < DateTime.Now,
                         stoppingToken)
